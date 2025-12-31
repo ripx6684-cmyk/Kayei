@@ -1,60 +1,76 @@
--- Ultra Responsive Lag Switch for Evade - 0.09 Second Freeze
-local Player = game:GetService("Players").LocalPlayer
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
--- Pastikan PlayerGui tersedia
+-- Random Freeze / Fake Crash (Delta Compatible)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local Player = Players.LocalPlayer
+
+-- Cleanup GUI
 local PlayerGui = Player:WaitForChild("PlayerGui")
--- Hapus GUI lama jika ada
 if PlayerGui:FindFirstChild("UltraFreezeUI") then
-PlayerGui.UltraFreezeUI:Destroy()
+	PlayerGui.UltraFreezeUI:Destroy()
 end
--- Buat ScreenGui baru
+
+-- GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "UltraFreezeUI"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.DisplayOrder = 999
 ScreenGui.Parent = PlayerGui
--- Overlay Full Screen (Hitam Transparan)
-local Overlay = Instance.new("Frame")
-Overlay.Name = "Overlay"
-Overlay.Size = UDim2.new(1, 0, 1, 0)
-Overlay.Position = UDim2.new(0, 0, 0, 0)
-Overlay.BackgroundColor3 = Color3.new(0, 0, 0)
-Overlay.BackgroundTransparency = 1
-Overlay.ZIndex = 20
-Overlay.Parent = ScreenGui
--- Main Container
-local MainContainer = Instance.new("Frame")
-MainContainer.Name = "MainContainer"
-MainContainer.Size = UDim2.new(0, 160, 0, 60)
-MainContainer.Position = UDim2.new(0.8, 0, 0.2, 0)
-MainContainer.BackgroundTransparency = 1
-MainContainer.Parent = ScreenGui
--- Main Button
-local FreezeButton = Instance.new("TextButton")
-FreezeButton.Name = "FreezeButton"
-FreezeButton.Size = UDim2.new(1, 0, 1, 0)
-FreezeButton.Position = UDim2.new(0, 0, 0, 0)
-FreezeButton.Text = "FREEZE NOW"
-FreezeButton.Font = Enum.Font.GothamBold
-FreezeButton.TextSize = 16
-FreezeButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-FreezeButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-FreezeButton.BackgroundTransparency = 0.2
-FreezeButton.AutoButtonColor = false
-FreezeButton.ZIndex = 10
-FreezeButton.Parent = MainContainer
--- Stroke Outline
-local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(60, 60, 80)
-Stroke.Thickness = 2
-Stroke.Transparency = 0.1
-Stroke.Parent = FreezeButton
--- Corner Radius
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0.15, 0)
-Corner.Parent = FreezeButton
--- Lag Switch Logic
-local FreezeDuration = 0.30 -- Di
+
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0,160,0,60)
+Button.Position = UDim2.new(0.8,0,0.2,0)
+Button.Text = "RANDOM FREEZE"
+Button.Font = Enum.Font.GothamBold
+Button.TextSize = 16
+Button.TextColor3 = Color3.fromRGB(235,235,235)
+Button.BackgroundColor3 = Color3.fromRGB(20,20,25)
+Button.Parent = ScreenGui
+
+Instance.new("UICorner", Button).CornerRadius = UDim.new(0.2,0)
+Instance.new("UIStroke", Button).Thickness = 2
+
+-- SETTINGS
+local MinFreeze = 0.3
+local MaxFreeze = 0.6
+local Busy = false
+
+-- Random freeze function
+local function RandomFreeze()
+	if Busy then return end
+	Busy = true
+
+	local char = Player.Character
+	if not char then Busy = false return end
+
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not humanoid or not root then Busy = false return end
+
+	-- Random duration
+	local FreezeDuration = math.random(
+		math.floor(MinFreeze * 100),
+		math.floor(MaxFreeze * 100)
+	) / 100
+
+	-- Save state
+	local oldWalk = humanoid.WalkSpeed
+	local oldJump = humanoid.JumpPower
+
+	-- Freeze
+	root.Anchored = true
+	humanoid.WalkSpeed = 0
+	humanoid.JumpPower = 0
+	UserInputService.ModalEnabled = true
+
+	task.wait(FreezeDuration)
+
+	-- Restore
+	root.Anchored = false
+	humanoid.WalkSpeed = oldWalk
+	humanoid.JumpPower = oldJump
+	UserInputService.ModalEnabled = false
+
+	Busy = false
+end
+
+Button.MouseButton1Click:Connect(RandomFreeze)
