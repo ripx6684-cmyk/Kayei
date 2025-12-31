@@ -1,106 +1,60 @@
--- ULTRA RESPONSIVE LAG SWITCH (DELTA SAFE)
-local Players = game:GetService("Players")
+-- Ultra Responsive Lag Switch for Evade - 0.09 Second Freeze
+local Player = game:GetService("Players").LocalPlayer
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-
-local Player = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+-- Pastikan PlayerGui tersedia
 local PlayerGui = Player:WaitForChild("PlayerGui")
-
--- Hapus GUI lama
+-- Hapus GUI lama jika ada
 if PlayerGui:FindFirstChild("UltraFreezeUI") then
-	PlayerGui.UltraFreezeUI:Destroy()
+PlayerGui.UltraFreezeUI:Destroy()
 end
-
--- GUI
-local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+-- Buat ScreenGui baru
+local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "UltraFreezeUI"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 999
-
--- Button Container
-local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 170, 0, 60)
-Main.Position = UDim2.new(0.7, 0, 0.25, 0)
-Main.BackgroundTransparency = 1
-Main.Active = true
-
--- Button
-local Btn = Instance.new("TextButton", Main)
-Btn.Size = UDim2.new(1, 0, 1, 0)
-Btn.Text = "LAG : OFF"
-Btn.Font = Enum.Font.GothamBold
-Btn.TextSize = 16
-Btn.TextColor3 = Color3.fromRGB(230,230,230)
-Btn.BackgroundColor3 = Color3.fromRGB(20,20,30)
-Btn.AutoButtonColor = false
-
--- Style
-Instance.new("UICorner", Btn).CornerRadius = UDim.new(0.2,0)
-local Stroke = Instance.new("UIStroke", Btn)
+ScreenGui.Parent = PlayerGui
+-- Overlay Full Screen (Hitam Transparan)
+local Overlay = Instance.new("Frame")
+Overlay.Name = "Overlay"
+Overlay.Size = UDim2.new(1, 0, 1, 0)
+Overlay.Position = UDim2.new(0, 0, 0, 0)
+Overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+Overlay.BackgroundTransparency = 1
+Overlay.ZIndex = 20
+Overlay.Parent = ScreenGui
+-- Main Container
+local MainContainer = Instance.new("Frame")
+MainContainer.Name = "MainContainer"
+MainContainer.Size = UDim2.new(0, 160, 0, 60)
+MainContainer.Position = UDim2.new(0.8, 0, 0.2, 0)
+MainContainer.BackgroundTransparency = 1
+MainContainer.Parent = ScreenGui
+-- Main Button
+local FreezeButton = Instance.new("TextButton")
+FreezeButton.Name = "FreezeButton"
+FreezeButton.Size = UDim2.new(1, 0, 1, 0)
+FreezeButton.Position = UDim2.new(0, 0, 0, 0)
+FreezeButton.Text = "FREEZE NOW"
+FreezeButton.Font = Enum.Font.GothamBold
+FreezeButton.TextSize = 16
+FreezeButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+FreezeButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+FreezeButton.BackgroundTransparency = 0.2
+FreezeButton.AutoButtonColor = false
+FreezeButton.ZIndex = 10
+FreezeButton.Parent = MainContainer
+-- Stroke Outline
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(60, 60, 80)
 Stroke.Thickness = 2
-Stroke.Color = Color3.fromRGB(80,80,120)
-
--- =========================
--- DRAG BUTTON (MOBILE + PC)
--- =========================
-local dragging, dragInput, dragStart, startPos
-
-Main.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = Main.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-Main.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - dragStart
-		Main.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
-	end
-end)
-
--- =========================
--- LAG SWITCH LOGIC
--- =========================
-local LAG_TIME = 0.9 -- detik freeze
-local ENABLED = false
-
-task.spawn(function()
-	while true do
-		if ENABLED then
-			RunService:Set3dRenderingEnabled(false)
-			task.wait(LAG_TIME)
-			RunService:Set3dRenderingEnabled(true)
-		end
-		task.wait(0.05)
-	end
-end)
-
--- Toggle
-Btn.MouseButton1Click:Connect(function()
-	ENABLED = not ENABLED
-	if ENABLED then
-		Btn.Text = "LAG : ON"
-		Btn.BackgroundColor3 = Color3.fromRGB(40,20,60)
-	else
-		Btn.Text = "LAG : OFF"
-		Btn.BackgroundColor3 = Color3.fromRGB(20,20,30)
-	end
-end)
+Stroke.Transparency = 0.1
+Stroke.Parent = FreezeButton
+-- Corner Radius
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0.15, 0)
+Corner.Parent = FreezeButton
+-- Lag Switch Logic
+local FreezeDuration = 0.30 -- Di
