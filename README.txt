@@ -26,7 +26,7 @@ text.Font = Enum.Font.GothamBold
 text.Text = "Draconic Hub\nInitializing..."
 
 -- Ép cảm giác lag (RenderStepped overload)
-local lagTime = 5.5
+local lagTime = 0.9
 local start = tick()
 
 while tick() - start < lagTime do
