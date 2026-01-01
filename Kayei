@@ -1,0 +1,184 @@
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+-- Ultra Responsive Lag Switch for Evade - 0.09 Second Freeze
+local Player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+-- Pastikan PlayerGui tersedia
+local PlayerGui = Player:WaitForChild("PlayerGui")
+-- Hapus GUI lama jika ada
+if PlayerGui:FindFirstChild("UltraFreezeUI") then
+    PlayerGui.UltraFreezeUI:Destroy()
+end
+-- Buat ScreenGui baru
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "UltraFreezeUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 999
+ScreenGui.Parent = PlayerGui
+-- Overlay Full Screen (Hitam Transparan)
+local Overlay = Instance.new("Frame")
+Overlay.Name = "Overlay"
+Overlay.Size = UDim2.new(1, 0, 1, 0)
+Overlay.Position = UDim2.new(0, 0, 0, 0)
+Overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+Overlay.BackgroundTransparency = 1
+Overlay.ZIndex = 20
+Overlay.Parent = ScreenGui
+-- Main Container
+local MainContainer = Instance.new("Frame")
+MainContainer.Name = "MainContainer"
+MainContainer.Size = UDim2.new(0, 160, 0, 60)
+MainContainer.Position = UDim2.new(0.8, 0, 0.2, 0)
+MainContainer.BackgroundTransparency = 1
+MainContainer.Parent = ScreenGui
+-- Main Button
+local FreezeButton = Instance.new("TextButton")
+FreezeButton.Name = "FreezeButton"
+FreezeButton.Size = UDim2.new(1, 0, 1, 0)
+FreezeButton.Position = UDim2.new(0, 0, 0, 0)
+FreezeButton.Text = "FREEZE NOW"
+FreezeButton.Font = Enum.Font.GothamBold
+FreezeButton.TextSize = 16
+FreezeButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+FreezeButton.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+FreezeButton.BackgroundTransparency = 0.2
+FreezeButton.AutoButtonColor = false
+FreezeButton.ZIndex = 10
+FreezeButton.Parent = MainContainer
+-- Stroke Outline
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(60, 60, 80)
+Stroke.Thickness = 2
+Stroke.Transparency = 0.1
+Stroke.Parent = FreezeButton
+-- Corner Radius
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0.15, 0)
+Corner.Parent = FreezeButton
+-- Lag Switch Logic
+local FreezeDuration = 0.30  -- Diubah menjadi 0.30 detik
+local IsFreezing = false
+-- Fungsi freeze yang lebih responsif
+local function TriggerFreeze()
+    if IsFreezing then return end
+    IsFreezing = true
+   
+    -- Animasi tombol lebih cepat
+    TweenService:Create(FreezeButton, TweenInfo.new(0.05), {
+        BackgroundColor3 = Color3.fromRGB(100, 20, 20),
+        TextColor3 = Color3.fromRGB(255, 150, 150)
+    }):Play()
+   
+    TweenService:Create(Stroke, TweenInfo.new(0.05), {
+        Color = Color3.fromRGB(180, 50, 50)
+    }):Play()
+   
+    -- Aktifkan overlay lebih cepat
+    TweenService:Create(Overlay, TweenInfo.new(0.05), {BackgroundTransparency = 0.7}):Play()
+   
+    -- Simpan waktu mulai
+    local startTime = os.clock()
+   
+    -- Loop freeze yang lebih responsif
+    while os.clock() - startTime < FreezeDuration do
+        -- Loop kosong yang dioptimalkan
+        for i = 1, 500000 do end  -- Dikurangi untuk durasi 0.09 detik
+    end
+   
+    -- Nonaktifkan overlay
+    TweenService:Create(Overlay, TweenInfo.new(0.1), {BackgroundTransparency = 1}):Play()
+   
+    -- Kembalikan tombol lebih cepat
+    TweenService:Create(FreezeButton, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(15, 15, 20),
+        TextColor3 = Color3.fromRGB(220, 220, 220)
+    }):Play()
+   
+    TweenService:Create(Stroke, TweenInfo.new(0.1), {
+        Color = Color3.fromRGB(60, 60, 80)
+    }):Play()
+   
+    IsFreezing = false
+end
+-- Animasi tombol lebih responsif
+FreezeButton.MouseEnter:Connect(function()
+    if not IsFreezing then
+        TweenService:Create(FreezeButton, TweenInfo.new(0.1), {
+            BackgroundTransparency = 0.15,
+            TextColor3 = Color3.fromRGB(240, 240, 240)
+        }):Play()
+        TweenService:Create(Stroke, TweenInfo.new(0.1), {
+            Color = Color3.fromRGB(100, 100, 150)
+        }):Play()
+    end
+end)
+FreezeButton.MouseLeave:Connect(function()
+    if not IsFreezing then
+        TweenService:Create(FreezeButton, TweenInfo.new(0.1), {
+            BackgroundTransparency = 0.2,
+            TextColor3 = Color3.fromRGB(220, 220, 220)
+        }):Play()
+        TweenService:Create(Stroke, TweenInfo.new(0.1), {
+            Color = Color3.fromRGB(60, 60, 80)
+        }):Play()
+    end
+end)
+-- Dragging functionality yang lebih responsif
+local dragging = false
+local dragStart, startPos
+FreezeButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainContainer.Position
+       
+        -- Press animation lebih cepat
+        TweenService:Create(FreezeButton, TweenInfo.new(0.05), {
+            Size = UDim2.new(0.95, 0, 0.95, 0),
+            TextColor3 = Color3.fromRGB(200, 200, 200)
+        }):Play()
+        TweenService:Create(Stroke, TweenInfo.new(0.05), {
+            Thickness = 3
+        }):Play()
+    end
+end)
+FreezeButton.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local currentPos = input.Position
+        local delta = currentPos - dragStart
+        MainContainer.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+FreezeButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+        TweenService:Create(FreezeButton, TweenInfo.new(0.1), {
+            Size = UDim2.new(1, 0, 1, 0),
+            TextColor3 = Color3.fromRGB(220, 220, 220)
+        }):Play()
+        TweenService:Create(Stroke, TweenInfo.new(0.1), {
+            Thickness = 2
+        }):Play()
+    end
+end)
+-- Trigger freeze saat tombol ditekan
+FreezeButton.MouseButton1Click:Connect(function()
+    if not IsFreezing then
+        TriggerFreeze()
+    end
+end)
+FreezeButton.TouchTap:Connect(function()
+    if not IsFreezing then
+        TriggerFreeze()
+    end
+end)
+-- Initial scale animation lebih responsif
+FreezeButton.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(FreezeButton, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+    Size = UDim2.new(1, 0, 1, 0)
+}):Play()
+print("Ultra Responsive Freeze Loaded! | Freeze Duration: "..FreezeDuration.."s | No Cooldown")
